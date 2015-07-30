@@ -19,7 +19,7 @@ import com.restfb.types.User;
 
 public class Main {
 	
-	public static String USERNAME, PASSWORD;
+	public static String USERNAME, PASSWORD, VERSION;
 	
 	public static final String APP_ID = "504745223013550";
 	public static final String APP_SECRET = "40ac485643dc8675ff2cbcb8434022b2";
@@ -50,6 +50,7 @@ public class Main {
 	public static void main(String args[]) throws Exception{
 		USERNAME = args[0];
 		PASSWORD = args[1];
+		VERSION = "1.0";
 		new Main();
 	}
 	
