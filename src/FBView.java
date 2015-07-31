@@ -113,7 +113,7 @@ public class FBView extends JFrame{
 		pane.add(btnApply);
 		pane.add(btnClear);
 		gibxAccount = new GIBXAccount(txtUsername, txtPassword);
-		controller = new Controller(docBuff, txtUserToken, gibxAccount);
+		controller = new Controller(docBuff, txtUserToken, gibxAccount, prgBuffer);
 		txtBuffer.setForeground(Color.WHITE);
 		txtBuffer.setBackground(Color.decode("#383838"));
 		controller.setBufferPane(txtBuffer);
