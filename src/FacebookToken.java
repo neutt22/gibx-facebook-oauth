@@ -1,5 +1,8 @@
+import java.io.IOException;
+import java.net.MalformedURLException;
 
-import javax.swing.JTextArea;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
@@ -7,6 +10,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -38,22 +42,49 @@ public class FacebookToken {
 	}
 	
 	public Token getAccessToken(Verifier verifier){
+		
 		return service.getAccessToken(EMPTY_TOKEN, verifier);
 	}
 	
 	
-	public String readURL(String url, String username, String password) throws Exception{
+	public String readURL(String url, String username, String password, StyledDocument txtBuffer){
 		final WebClient web = new WebClient();
-		HtmlPage page = web.getPage(url);
-		HtmlForm form = (HtmlForm) page.getElementById("login_form");
-		HtmlTextInput txtEmail = form.getInputByName("email");
-		txtEmail.setValueAttribute(username);
-		HtmlPasswordInput txtPass = form.getInputByName("pass");
-		txtPass.setValueAttribute(password);
-		HtmlSubmitInput button = (HtmlSubmitInput) form.getInputsByValue("Log In").get(0);
-		HtmlPage page2 = button.click();
-		String urls[] = page2.getUrl().toString().split("=");
-		return urls[1];
+		HtmlPage page;
+		try {
+			page = web.getPage(url);
+			HtmlForm form = (HtmlForm) page.getElementById("login_form");
+			HtmlTextInput txtEmail = form.getInputByName("email");
+			txtEmail.setValueAttribute(username);
+			HtmlPasswordInput txtPass = form.getInputByName("pass");
+			txtPass.setValueAttribute(password);
+			HtmlSubmitInput button = (HtmlSubmitInput) form.getInputsByValue("Log In").get(0);
+			HtmlPage page2 = button.click();
+			String urls[] = page2.getUrl().toString().split("=");
+			web.close();
+			return urls[1];
+		} catch (FailingHttpStatusCodeException e) {
+			try {
+				txtBuffer.insertString(txtBuffer.getLength(), "FAILING HTTP ERROR: " + e.getMessage() + "\n", Controller.STYLE_FAILED);
+			} catch (BadLocationException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			try {
+				txtBuffer.insertString(txtBuffer.getLength(), "MALFORMED URL ERROR: " + e.getMessage() + "\n", Controller.STYLE_FAILED);
+			} catch (BadLocationException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		} catch (IOException e) {
+			try {
+				txtBuffer.insertString(txtBuffer.getLength(), "IO ERROR: " + e.getMessage() + "\n", Controller.STYLE_FAILED);
+			} catch (BadLocationException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

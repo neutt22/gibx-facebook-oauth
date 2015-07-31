@@ -27,5 +27,6 @@
 	<classpathentry kind="lib" path="J:/libs/htmlunit-2.17-bin/htmlunit-2.17/lib/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="J:/libs/miglayout-3.5.5.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="J:/libs/ini4j-0.5.4-bin/ini4j-0.5.4/ini4j-0.5.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

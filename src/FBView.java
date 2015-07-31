@@ -1,9 +1,10 @@
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -18,15 +19,20 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
 
 import net.miginfocom.swing.MigLayout;
+
+import org.ini4j.Wini;
 
 public class FBView extends JFrame{
 	
 	private static final long serialVersionUID = 1L;
 	public static String USERNAME, PASSWORD;
 	private GIBXAccount gibxAccount;
+	public static String APPDATA = System.getenv("APPDATA") + "\\";
+	public static String INI_NAME = "gibx_conf.ini";
 
 	public static void main(String args[]){
 		USERNAME = args[0];
@@ -44,6 +50,7 @@ public class FBView extends JFrame{
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setupSkin();
 		pack();
+		init();
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -55,6 +62,25 @@ public class FBView extends JFrame{
 		
 		btnClear.setActionCommand("clear_buff");
 		btnClear.addActionListener(controller);
+		
+		btnUpdateToken.setActionCommand("update_token");
+		btnUpdateToken.addActionListener(controller);
+	}
+	
+	private void init(){
+		String iniFile = APPDATA + INI_NAME;
+		try{
+			File file = new File(iniFile);
+			if(!file.exists()){
+				file.createNewFile();
+				Wini ini = new Wini(new File(iniFile));
+				ini.put("main", "user_token", "Please generate your API token");
+				ini.store();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		Utils.showToken(txtUserToken);
 	}
 	
 	private JTextPane txtBuffer = new JTextPane();
@@ -63,18 +89,24 @@ public class FBView extends JFrame{
 	private JButton btnApply = new JButton("Apply");
 	private JButton btnClear = new JButton("Clear");
 	private Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
+	private JButton btnKill = new JButton("Kill");
 	private JPanel setupBuffer(){
 		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		txtBuffer.setCursor(textCursor);
 		txtBuffer.setEditable(false);
-		pane.add(new JLabel("Buffer:"), "wrap");
+		pane.add(new JLabel("Buffer:"), "split");
+		pane.add(new JSeparator(), "growx");
+		pane.add(btnKill, "wrap");
 		pane.add(new JScrollPane(txtBuffer), "grow, h 400, wrap, width 530");
 		pane.add(prgBuffer, "grow, split");
 		pane.add(btnApply);
 		pane.add(btnClear);
 		gibxAccount = new GIBXAccount(txtUsername, txtPassword);
 		controller = new Controller(docBuff, txtUserToken, gibxAccount);
-		
+		txtBuffer.setForeground(Color.WHITE);
+		txtBuffer.setBackground(Color.decode("#383838"));
+		controller.setBufferPane(txtBuffer);
+		((DefaultCaret)txtBuffer.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		return pane;
 	}
 	
@@ -88,6 +120,7 @@ public class FBView extends JFrame{
 	private JButton btnPublishPhoto = new JButton("Publish Photo");
 	private JTextField txtUserToken = new JTextField("Please specify your API token");
 	private JButton btnCheckToken = new JButton("Get Token");
+	private JButton btnUpdateToken = new JButton("Update");
 	private JPanel setupHead(){
 		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		pane.add(new JLabel("Username:"), "split 2");
@@ -100,8 +133,9 @@ public class FBView extends JFrame{
 		pane.add(btnPublishPhoto, "w 120, wrap");
 		pane.add(chkRenewal, "wrap");
 		pane.add(chkCongrats, "wrap");
-		pane.add(new JLabel("User Token:"), "split 2, span");
-		pane.add(txtUserToken, "growx, wrap");
+		pane.add(new JLabel("User Token:"), "split 3, span");
+		pane.add(txtUserToken, "growx");
+		pane.add(btnUpdateToken, "wrap");
 		pane.add(new JSeparator(), "growx, span");
 		return pane;
 	}
