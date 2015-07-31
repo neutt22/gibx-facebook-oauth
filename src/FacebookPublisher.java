@@ -1,3 +1,4 @@
+import com.restfb.BinaryAttachment;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -25,8 +26,25 @@ public class FacebookPublisher {
 		String accountToken = accounts.getData().get(account_index).getAccessToken();
 		accountName = accounts.getData().get(account_index).getId();
 		FacebookClient account = new DefaultFacebookClient(accountToken, Version.VERSION_2_4);
-		FacebookType pubAcctMsg = account.publish("me/feed", FacebookType.class, Parameter.with("message", feed));
+		FacebookType pubAcctMsg = account.publish(
+				"me/feed", 
+				FacebookType.class,
+				Parameter.with("message", feed)
+		);
 		return pubAcctMsg.getId().split("_")[1];
+	}
+	
+	public String postPhotoFeed(int account_index, String feed, String image){
+		String accountToken = accounts.getData().get(account_index).getAccessToken();
+		accountName = accounts.getData().get(account_index).getId();
+		FacebookClient account = new DefaultFacebookClient(accountToken, Version.VERSION_2_4);
+		FacebookType pubAcctMsg = account.publish(
+				"me/photos", 
+				FacebookType.class,
+				BinaryAttachment.with("cat.png", PhotoBytes.fetchBytesFromImage(image)),
+				Parameter.with("message", feed)
+		);
+		return pubAcctMsg.getId();
 	}
 	
 	public String getAccountName(){ return accountName; }

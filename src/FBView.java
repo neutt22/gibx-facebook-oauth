@@ -73,6 +73,9 @@ public class FBView extends JFrame{
 		
 		btnPublishText.setActionCommand("publish_text");
 		btnPublishText.addActionListener(controller);
+		
+		btnPublishPhoto.setActionCommand("publish_photo");
+		btnPublishPhoto.addActionListener(controller);
 	}
 	
 	private void init(){

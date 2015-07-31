@@ -1,9 +1,11 @@
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
@@ -13,8 +15,9 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import org.ini4j.Wini;
 import org.scribe.model.Verifier;
+
+import com.guevent.gibx.jim.fboauth.view.FBPublisher;
 
 
 public class Controller implements ActionListener{
@@ -51,37 +54,58 @@ public class Controller implements ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent ae){
+		if(ae.getActionCommand().equals("get_user_token")){
+			new UIWorker().executeUserTokenWorker();
+		}
 		if(ae.getActionCommand().equals("publish_text")){
-			new UIWorker().executePublishPhotoWorker();
+			FBPublisher fb = new FBPublisher();
+			if(fb.getFeed() != null) new UIWorker().executePublishTextWorker(fb.getFeed());
+		}
+		if(ae.getActionCommand().equals("publish_photo")){
+			FBPublisher fb = new FBPublisher();
+			if(fb.getFeed() != null) new UIWorker().executePublishPhotoWorker(fb.getFeed(), fb.getImage());
 		}
 		if(ae.getActionCommand().equals("update_token")){
 			Utils.updateToken(txtUserToken.getText(), txtBuffer);
 			bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
 		}
-		if(ae.getActionCommand().equals("get_user_token")){
-			new UIWorker().executeUserTokenWorker();
-			
-		}else if(ae.getActionCommand().equals("clear_buff")){
+		if(ae.getActionCommand().equals("clear_buff")){
 			bufferPane.setText("");
 		}
 	}
 	
 	private class UIWorker{
 		
+		private String feed, image;
+		
 		public void executeUserTokenWorker(){
 			userTokenWorker.execute();
 		}
 		
-		public void executePublishPhotoWorker(){
-			publishTextWorker.execute();
+		public void executePublishTextWorker(String feed){
+			this.feed = feed;
+			image = "";
+			publishWorker.execute();
 		}
 		
-		private SwingWorker<Boolean, BufferStyle> publishTextWorker = new SwingWorker<Boolean, BufferStyle>(){
+		public void executePublishPhotoWorker(String feed, String image){
+			this.feed = feed;
+			this.image = image;
+			publishWorker.execute();
+		}
+		
+		private SwingWorker<Boolean, BufferStyle> publishWorker = new SwingWorker<Boolean, BufferStyle>(){
 			
 			protected Boolean doInBackground() throws Exception {
-				publish(new BufferStyle("Publishing a post...\n", null));
+				publish(new BufferStyle("Publishing a post... ", null));
+				publish(new BufferStyle("(If it's taking too long, update your user token)\n\n", STYLE_ITALIC));
 				FacebookPublisher pub = new FacebookPublisher(txtUserToken.getText());
-				String id = pub.postFeed(0, "Testing UI facebook group manage tools");
+				String id;
+				if(image.length() == 0){
+					id = pub.postFeed(0, feed);
+				}else{
+					id = pub.postPhotoFeed(0, feed, image);
+				}
 				String link = "www.facebook.com/" + pub.getAccountName() + "/posts/" + id;
 				publish(new BufferStyle("Successfully published a post! " , STYLE_SUCCESS));
 				publish(new BufferStyle("Check it out on:\n", null));
@@ -126,8 +150,8 @@ public class Controller implements ActionListener{
 				}
 				publish(new BufferStyle("Request Token: " + code + "\n", null));
 				Verifier v = new Verifier(code);
-				publish(new BufferStyle("Trading code for access token...", null));
-				publish(new BufferStyle("If it's taking too long, check your credentials/permissions and try again\n", STYLE_ITALIC));Thread.sleep(500);
+				publish(new BufferStyle("Trading code for access token... ", null));
+				publish(new BufferStyle("(If it's taking too long, check your credentials/permissions and try again)\n", STYLE_ITALIC));Thread.sleep(500);
 				publish(new BufferStyle("...\n", null));
 				String accessToken = token.getAccessToken(v).getToken();
 				publish(new BufferStyle("ACCESS TOKEN ACQUIRED:\n", STYLE_SUCCESS));
