@@ -29,9 +29,6 @@ public class Main {
 	public Main(){
 		String accessToken = new FacebookToken().getAccessToken();
 		
-		//APP ACCESS TOKEN
-		//AccessToken pageToken = new DefaultFacebookClient(Version.VERSION_2_4).obtainAppAccessToken(APP_ID, APP_SECRET);
-		
 		facebookClient = new DefaultFacebookClient(accessToken, Version.VERSION_2_4);
 		Connection<Account> accounts = facebookClient.fetchConnection("me/accounts", Account.class);
 		out.println("Account: " + accounts.getData().get(0).getName());
@@ -43,6 +40,7 @@ public class Main {
 		FacebookClient claimsFB = new DefaultFacebookClient(claimsAppToken, Version.VERSION_2_4);
 		Connection<Post> posts = claimsFB.fetchConnection("me/feed", Post.class);
 		out.println("My Post: " + posts.getData().get(0));
+		
 		postFeedWithPhoto("Scribe with manage_accounts, publish_pages, and publish_actions permissions", "me", "J:/Chrysanthemum.png", claimsFB);
 		
 	}

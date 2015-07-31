@@ -2,9 +2,11 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -19,8 +21,11 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.html.HTMLEditorKit;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -65,6 +70,9 @@ public class FBView extends JFrame{
 		
 		btnUpdateToken.setActionCommand("update_token");
 		btnUpdateToken.addActionListener(controller);
+		
+		btnPublishText.setActionCommand("publish_text");
+		btnPublishText.addActionListener(controller);
 	}
 	
 	private void init(){
@@ -84,7 +92,7 @@ public class FBView extends JFrame{
 	}
 	
 	private JTextPane txtBuffer = new JTextPane();
-	private StyledDocument docBuff = txtBuffer.getStyledDocument();
+	private StyledDocument docBuff = (StyledDocument) txtBuffer.getDocument();
 	private JProgressBar prgBuffer = new JProgressBar(0, 100);
 	private JButton btnApply = new JButton("Apply");
 	private JButton btnClear = new JButton("Clear");

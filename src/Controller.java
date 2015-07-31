@@ -51,15 +51,16 @@ public class Controller implements ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent ae){
+		if(ae.getActionCommand().equals("publish_text")){
+			new UIWorker().executePublishPhotoWorker();
+		}
 		if(ae.getActionCommand().equals("update_token")){
 			Utils.updateToken(txtUserToken.getText(), txtBuffer);
+			bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
 		}
 		if(ae.getActionCommand().equals("get_user_token")){
-			try {
-				new UIWorker();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			new UIWorker().executeUserTokenWorker();
+			
 		}else if(ae.getActionCommand().equals("clear_buff")){
 			bufferPane.setText("");
 		}
@@ -67,9 +68,42 @@ public class Controller implements ActionListener{
 	
 	private class UIWorker{
 		
-		public UIWorker(){uiWorker.execute();}
+		public void executeUserTokenWorker(){
+			userTokenWorker.execute();
+		}
 		
-		private SwingWorker<Boolean, BufferStyle> uiWorker = new SwingWorker<Boolean, BufferStyle>(){
+		public void executePublishPhotoWorker(){
+			publishTextWorker.execute();
+		}
+		
+		private SwingWorker<Boolean, BufferStyle> publishTextWorker = new SwingWorker<Boolean, BufferStyle>(){
+			
+			protected Boolean doInBackground() throws Exception {
+				publish(new BufferStyle("Publishing a post...\n", null));
+				FacebookPublisher pub = new FacebookPublisher(txtUserToken.getText());
+				String id = pub.postFeed(0, "Testing UI facebook group manage tools");
+				String link = "www.facebook.com/" + pub.getAccountName() + "/posts/" + id;
+				publish(new BufferStyle("Successfully published a post! " , STYLE_SUCCESS));
+				publish(new BufferStyle("Check it out on:\n", null));
+				publish(new BufferStyle(link + "\n", null));
+				publish(new BufferStyle(DASH, null));
+				bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
+				return true;
+			}
+			
+			protected void process(List<BufferStyle> msgs){
+				try {
+					for(BufferStyle msg : msgs){
+						txtBuffer.insertString(txtBuffer.getLength(), msg.getMessage(), msg.getStyle());
+					}
+					bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
+				} catch (BadLocationException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		
+		private SwingWorker<Boolean, BufferStyle> userTokenWorker = new SwingWorker<Boolean, BufferStyle>(){
 			
 			protected Boolean doInBackground() throws Exception{
 				FacebookToken token = new FacebookToken();Thread.sleep(500);
@@ -108,6 +142,7 @@ public class Controller implements ActionListener{
 					for(BufferStyle msg : msgs){
 						txtBuffer.insertString(txtBuffer.getLength(), msg.getMessage(), msg.getStyle());
 					}
+					bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
 				} catch (BadLocationException e) {
 					e.printStackTrace();
 				}
