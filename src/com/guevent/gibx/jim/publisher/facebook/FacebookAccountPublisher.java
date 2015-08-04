@@ -1,3 +1,6 @@
+package com.guevent.gibx.jim.publisher.facebook;
+
+import com.guevent.gibx.jim.utils.PhotoBytes;
 import com.restfb.BinaryAttachment;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
@@ -8,14 +11,14 @@ import com.restfb.types.Account;
 import com.restfb.types.FacebookType;
 
 
-public class FacebookPublisher {
+public class FacebookAccountPublisher {
 	
 	private String accessToken;
 	private String accountName;
 	private FacebookClient myFb;
 	private Connection<Account> accounts;
 	
-	public FacebookPublisher(String token){
+	public FacebookAccountPublisher(String token){
 		accessToken = token;
 		myFb = new DefaultFacebookClient(accessToken, Version.VERSION_2_4);
 		accounts = myFb.fetchConnection("me/accounts", Account.class);
@@ -39,7 +42,8 @@ public class FacebookPublisher {
 		accountName = accounts.getData().get(account_index).getId();
 		FacebookClient account = new DefaultFacebookClient(accountToken, Version.VERSION_2_4);
 		FacebookType pubAcctMsg = account.publish(
-				"me/photos", 
+				//F360 FORUM = 1401856530050018
+				"me/photos",
 				FacebookType.class,
 				BinaryAttachment.with("cat.png", PhotoBytes.fetchBytesFromImage(image)),
 				Parameter.with("message", feed)

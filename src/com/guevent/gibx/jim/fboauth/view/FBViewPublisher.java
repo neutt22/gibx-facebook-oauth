@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.miginfocom.swing.MigLayout;
 
-public class FBPublisher extends JDialog implements ActionListener, MouseListener{
+public class FBViewPublisher extends JDialog implements ActionListener, MouseListener{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -31,7 +31,7 @@ public class FBPublisher extends JDialog implements ActionListener, MouseListene
 	public String getFeed() { return feed; }
 	public String getImage() { return lblImage.getText(); }
 
-	public FBPublisher(){
+	public FBViewPublisher(){
 		btnCancel = new JButton("Cancel");
 		setTitle("GIBX Publisher");
 		JPanel pane = new JPanel();

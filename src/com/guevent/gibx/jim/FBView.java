@@ -1,12 +1,13 @@
+package com.guevent.gibx.jim;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -21,15 +22,16 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.html.HTMLEditorKit;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.ini4j.Wini;
+
+import com.guevent.gibx.jim.controller.Controller;
+import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
+import com.guevent.gibx.jim.utils.Utils;
 
 public class FBView extends JFrame{
 	
@@ -42,10 +44,12 @@ public class FBView extends JFrame{
 	public static void main(String args[]){
 		USERNAME = args[0];
 		PASSWORD = args[1];
-		new FBView();
+		
+		new FBView(new BirthdayChecker().readExcel());
 	}
 	
-	public FBView(){
+	private List<F360Member> members;
+	public FBView(List<F360Member> m){
 		super("GIBX Facebook Group Updater v." + Main.VERSION);
 		setLayout(new MigLayout("", "[grow]", "[grow]"));
 		setupMenu();
@@ -58,6 +62,7 @@ public class FBView extends JFrame{
 		init();
 		setLocationRelativeTo(null);
 		setVisible(true);
+		members = m;
 	}
 	
 	private Controller controller;

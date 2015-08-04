@@ -1,7 +1,9 @@
+package com.guevent.gibx.jim;
 import static java.lang.System.out;
 
 import java.util.List;
 
+import com.guevent.gibx.jim.utils.PhotoBytes;
 import com.restfb.BinaryAttachment;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
@@ -12,6 +14,7 @@ import com.restfb.Version;
 import com.restfb.json.JsonObject;
 import com.restfb.types.Account;
 import com.restfb.types.FacebookType;
+import com.restfb.types.Group;
 import com.restfb.types.Page;
 import com.restfb.types.Post;
 import com.restfb.types.User;
@@ -27,21 +30,20 @@ public class Main {
 	private FacebookClient facebookClient;
 	
 	public Main(){
-		String accessToken = new FacebookToken().getAccessToken();
+		String accessToken = "CAAHLECe4RK4BAEIfqJWCTGich3CwxR5CdZBwh0JhtwzwjET2I1jZBf9JbgUS0H2I2ZAo3L9QFOpWPstDUOG3PBIZBcBZBtvgxF4uhgyjdVXV98imLYZBjPwKa0rgoMQ7yKIrzkDbUQC1VNAyxZCSZCgPGceuvCZC6vhoTa15OiFPyetRFAl6ryZADjQ0E0TzHZAtRFNUA1u3UdtDnp55uWcfxrV";
 		
 		facebookClient = new DefaultFacebookClient(accessToken, Version.VERSION_2_4);
-		Connection<Account> accounts = facebookClient.fetchConnection("me/accounts", Account.class);
-		out.println("Account: " + accounts.getData().get(0).getName());
+		Connection<Group> groups = facebookClient.fetchConnection("me/groups", Group.class);
+		out.println("Group: " + groups.getData().get(0));
+		//postFeed("Attention:", groups.getData().get(0).getId(), facebookClient);
 		
-		//accounts.getData().get(0).addPerm("publish_actions");
-		String claimsAppToken = accounts.getData().get(0).getAccessToken();
-		
-		out.println("Claims Token: " + claimsAppToken);
-		FacebookClient claimsFB = new DefaultFacebookClient(claimsAppToken, Version.VERSION_2_4);
-		Connection<Post> posts = claimsFB.fetchConnection("me/feed", Post.class);
-		out.println("My Post: " + posts.getData().get(0));
-		
-		postFeedWithPhoto("Scribe with manage_accounts, publish_pages, and publish_actions permissions", "me", "J:/Chrysanthemum.png", claimsFB);
+//		String claimsAppToken = accounts.getData().get(0).getAccessToken();
+//		out.println("Claims Token: " + claimsAppToken);
+//		FacebookClient claimsFB = new DefaultFacebookClient(claimsAppToken, Version.VERSION_2_4);
+//		Connection<Post> posts = claimsFB.fetchConnection("me/feed", Post.class);
+//		out.println("My Post: " + posts.getData().get(0));
+//		
+//		postFeedWithPhoto("Scribe with manage_accounts, publish_pages, and publish_actions permissions", "me", "J:/Chrysanthemum.png", claimsFB);
 		
 	}
 	

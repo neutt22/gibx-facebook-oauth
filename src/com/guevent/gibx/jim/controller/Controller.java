@@ -1,3 +1,5 @@
+package com.guevent.gibx.jim.controller;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +20,13 @@ import javax.swing.text.StyledDocument;
 
 import org.scribe.model.Verifier;
 
-import com.guevent.gibx.jim.fboauth.view.FBPublisher;
+import com.guevent.gibx.jim.FacebookToken;
+import com.guevent.gibx.jim.GIBXAccount;
+import com.guevent.gibx.jim.fboauth.view.FBViewPublisher;
+import com.guevent.gibx.jim.publisher.facebook.FacebookAccountPublisher;
+import com.guevent.gibx.jim.publisher.facebook.FacebookGroupPublisher;
+import com.guevent.gibx.jim.utils.BufferStyle;
+import com.guevent.gibx.jim.utils.Utils;
 
 
 public class Controller implements ActionListener{
@@ -60,11 +68,11 @@ public class Controller implements ActionListener{
 			new UIWorker().executeUserTokenWorker();
 		}
 		if(ae.getActionCommand().equals("publish_text")){
-			FBPublisher fb = new FBPublisher();
+			FBViewPublisher fb = new FBViewPublisher();
 			if(fb.getFeed() != null) new UIWorker().executePublishTextWorker(fb.getFeed());
 		}
 		if(ae.getActionCommand().equals("publish_photo")){
-			FBPublisher fb = new FBPublisher();
+			FBViewPublisher fb = new FBViewPublisher();
 			if(fb.getFeed() != null) new UIWorker().executePublishPhotoWorker(fb.getFeed(), fb.getImage());
 		}
 		if(ae.getActionCommand().equals("update_token")){
@@ -146,21 +154,28 @@ public class Controller implements ActionListener{
 		private SwingWorker<Boolean, BufferStyle> publishWorker = new SwingWorker<Boolean, BufferStyle>(){
 			
 			protected Boolean doInBackground() throws Exception {
-				publish(new BufferStyle("Publishing a post... ", null));
+				publish(new BufferStyle("Initiating... ", null));
 				barProgress.setValue(30);
-				publish(new BufferStyle("(If it's taking too long, update your user token)\n\n", STYLE_ITALIC));
-				FacebookPublisher pub = new FacebookPublisher(txtUserToken.getText());
+				publish(new BufferStyle("(If it's taking too long, update your user token)\n", STYLE_ITALIC));
+				FacebookAccountPublisher pub = new FacebookAccountPublisher(txtUserToken.getText());
+				FacebookGroupPublisher gPub = new FacebookGroupPublisher(txtUserToken.getText());
+				publish(new BufferStyle("Publishing a post... \n\n", null));
 				String id;
+				String gId;
 				if(image.length() == 0){
 					id = pub.postFeed(0, feed);
+					gId = gPub.postGroupFeed(feed);
 				}else{
 					id = pub.postPhotoFeed(0, feed, image);
+					gId = gPub.postGroupFeedWithPhoto(feed, image);
 				}
 				barProgress.setValue(100);
 				String link = "www.facebook.com/" + pub.getAccountName() + "/posts/" + id;
+				String gLink = "www.facebook.com/" + gPub.getGroupId() + "/posts/" + gId;
 				publish(new BufferStyle("Successfully published a post! " , STYLE_SUCCESS));
 				publish(new BufferStyle("Check it out on:\n", null));
 				publish(new BufferStyle(link + "\n", null));
+				publish(new BufferStyle(gLink + "\n", null));
 				publish(new BufferStyle(DASH, null));
 				bufferPane.setCaretPosition(bufferPane.getDocument().getLength());
 				Thread.sleep(300);

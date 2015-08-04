@@ -1,3 +1,5 @@
+package com.guevent.gibx.jim;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -17,6 +19,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.guevent.gibx.jim.controller.Controller;
 
 public class FacebookToken {
 	
@@ -33,7 +36,7 @@ public class FacebookToken {
 		  .apiKey(Main.APP_ID)
 		  .apiSecret(Main.APP_SECRET)
 		  .callback("http://localhost/callback")
-		  .scope("manage_pages,publish_actions,publish_pages")
+		  .scope("manage_pages,publish_actions,publish_pages,user_managed_groups")
 		  .build();
 	}
 	

@@ -1,9 +1,13 @@
+package com.guevent.gibx.jim.utils;
+
 import java.io.File;
 
 import javax.swing.JTextField;
 import javax.swing.text.StyledDocument;
 
 import org.ini4j.Wini;
+
+import com.guevent.gibx.jim.FBView;
 
 
 public class Utils {

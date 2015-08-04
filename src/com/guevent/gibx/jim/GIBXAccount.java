@@ -1,3 +1,4 @@
+package com.guevent.gibx.jim;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
