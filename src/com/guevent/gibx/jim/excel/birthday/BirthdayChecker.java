@@ -13,7 +13,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.guevent.gibx.jim.F360Member;
+import com.guevent.gibx.jim.f360.F360Member;
 
 public class BirthdayChecker {
 	
@@ -36,7 +36,7 @@ public class BirthdayChecker {
 			
 			String fullDate = dateFormat.format(new Date());
 			String date = fullDate.substring(0, fullDate.length() - 5);
-			date = "08/03";
+			//date = "08/03";
 			
 			Iterator<Row> rowIterator = sheet.iterator();
 			while(rowIterator.hasNext()){

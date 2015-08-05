@@ -12,16 +12,20 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
 
@@ -30,10 +34,12 @@ import net.miginfocom.swing.MigLayout;
 import org.ini4j.Wini;
 
 import com.guevent.gibx.jim.controller.Controller;
+import com.guevent.gibx.jim.controller.DBController;
 import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
+import com.guevent.gibx.jim.f360.F360Member;
 import com.guevent.gibx.jim.utils.Utils;
 
-public class FBView extends JFrame{
+public class MainView extends JFrame{
 	
 	private static final long serialVersionUID = 1L;
 	public static String USERNAME, PASSWORD;
@@ -44,28 +50,41 @@ public class FBView extends JFrame{
 	public static void main(String args[]){
 		USERNAME = args[0];
 		PASSWORD = args[1];
-		
-		new FBView(new BirthdayChecker().readExcel());
+		//new MainView(new BirthdayChecker().readExcel());
+		new MainView(null);
 	}
 	
 	private List<F360Member> members;
-	public FBView(List<F360Member> m){
+	public MainView(List<F360Member> m){
 		super("GIBX Facebook Group Updater v." + Main.VERSION);
-		setLayout(new MigLayout("", "[grow]", "[grow]"));
+		setLayout(new MigLayout("fill"));
 		setupMenu();
-		add(setupHead(), "wrap");
-		add(setupBuffer(), "wrap");
+		
+		JTabbedPane tabPane = new JTabbedPane();
+		JPanel fbPane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		fbPane.add(setupHead(), "wrap, top");
+		//fbPane.add(setupBuffer(), "wrap");
+		tabPane.add("Publish", fbPane);
+		
+		JPanel dbPane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		dbPane.add(getDbHeadPane(), "wrap, top");
+		tabPane.add("F360", dbPane);
+		
+		add(tabPane, "top, wrap");
+		add(setupBuffer());
 		setupListener();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setupSkin();
 		pack();
 		init();
 		setLocationRelativeTo(null);
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setVisible(true);
 		members = m;
 	}
 	
 	private Controller controller;
+	private DBController dbController; 
 	private void setupListener(){
 		btnCheckToken.setActionCommand("get_user_token");
 		btnCheckToken.addActionListener(controller);
@@ -81,6 +100,16 @@ public class FBView extends JFrame{
 		
 		btnPublishPhoto.setActionCommand("publish_photo");
 		btnPublishPhoto.addActionListener(controller);
+		
+		
+		mnuToolsDbLoad.setActionCommand("db_load");
+		mnuToolsDbLoad.addActionListener(dbController);
+		
+		mnuToolsRecursive.setActionCommand("db_recursive");
+		mnuToolsRecursive.addActionListener(dbController);
+		
+		btnDbSearch.setActionCommand("db_search");
+		btnDbSearch.addActionListener(dbController);		
 	}
 	
 	private void init(){
@@ -105,15 +134,13 @@ public class FBView extends JFrame{
 	private JButton btnApply = new JButton("Apply");
 	private JButton btnClear = new JButton("Clear");
 	private Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
-	private JButton btnKill = new JButton("Kill");
 	private JPanel setupBuffer(){
 		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		txtBuffer.setCursor(textCursor);
 		txtBuffer.setEditable(false);
-		pane.add(new JLabel("Buffer:"), "split");
-		pane.add(new JSeparator(), "growx");
-		pane.add(btnKill, "wrap");
-		pane.add(new JScrollPane(txtBuffer), "grow, h 400, wrap, width 530");
+		pane.add(new JLabel("Buffer:"), "span, split");
+		pane.add(new JSeparator(JSeparator.HORIZONTAL), "w 1280, wrap");
+		pane.add(new JScrollPane(txtBuffer), "grow, h 800, wrap");
 		pane.add(prgBuffer, "grow, split");
 		pane.add(btnApply);
 		pane.add(btnClear);
@@ -127,8 +154,8 @@ public class FBView extends JFrame{
 	}
 	
 	//ToDo: Timer when is the next update
-	private JTextField txtUsername = new JTextField(USERNAME);
-	private JPasswordField txtPassword = new JPasswordField(PASSWORD);
+	private JTextField txtUsername = new JTextField(20);
+	private JPasswordField txtPassword = new JPasswordField(20);
 	private JCheckBox chkBirthday = new JCheckBox("Post Birthday Card", true);
 	private JCheckBox chkRenewal = new JCheckBox("Post Renewal Card", true);
 	private JCheckBox chkCongrats = new JCheckBox("Post Congratulations Card", true);
@@ -140,9 +167,9 @@ public class FBView extends JFrame{
 	private JPanel setupHead(){
 		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		pane.add(new JLabel("Username:"), "split 2");
-		pane.add(txtUsername, "w 150, grow");
-		pane.add(new JLabel("Password:"), "gapleft 30, split 3");
-		pane.add(txtPassword, "w 150, grow");
+		pane.add(txtUsername, "grow");
+		pane.add(new JLabel("Password:"), "gapleft 40, split 2");
+		pane.add(txtPassword, "grow");
 		pane.add(btnCheckToken, "wrap");
 		pane.add(chkBirthday);
 		pane.add(btnPublishText, "w 120, split 2, center");
@@ -156,6 +183,16 @@ public class FBView extends JFrame{
 		return pane;
 	}
 	
+	private JMenuBar mnuBar = new JMenuBar();
+	private JMenu mnuFile = new JMenu("File");
+	private JMenu mnuPublish = new JMenu("Publish");
+	private JMenu mnuGroup = new JMenu("Group");
+	private JMenu mnuAbout = new JMenu("About");
+	private JMenu mnuAccounts = new JMenu("Accounts");
+	private JMenu mnuRemote = new JMenu("Remote");
+	private JMenu mnuTools = new JMenu("Tools");
+	private JMenuItem mnuToolsDbLoad = new JMenuItem("Load");
+	private JMenuItem mnuToolsRecursive = new JMenuItem("Recursive");
 	private void setupMenu(){
 		mnuFile.setMnemonic(KeyEvent.VK_F);
 		mnuPublish.setMnemonic(KeyEvent.VK_P);
@@ -169,6 +206,8 @@ public class FBView extends JFrame{
 		mnuBar.add(mnuGroup);
 		mnuBar.add(mnuAccounts);
 		mnuBar.add(mnuRemote);
+		mnuTools.add(mnuToolsDbLoad);
+		mnuTools.add(mnuToolsRecursive);
 		mnuBar.add(mnuTools);
 		mnuBar.add(mnuAbout);
 		setJMenuBar(mnuBar);
@@ -189,13 +228,35 @@ public class FBView extends JFrame{
 		}
 	}
 	
-	private JMenuBar mnuBar = new JMenuBar();
-	private JMenu mnuFile = new JMenu("File");
-	private JMenu mnuPublish = new JMenu("Publish");
-	private JMenu mnuGroup = new JMenu("Group");
-	private JMenu mnuAbout = new JMenu("About");
-	private JMenu mnuAccounts = new JMenu("Accounts");
-	private JMenu mnuRemote = new JMenu("Remote");
-	private JMenu mnuTools = new JMenu("Tools");
 
+	////////////////////////////////////////////// DB VIEW ////////////////////////////////////////////////////////
+	
+	private JTextField txtDbSearch = new JTextField();
+	private JButton btnDbSearch = new JButton("Search");
+	private JTable dbTable;
+	private DefaultTableModel dbTableModel;
+	private String[] columns = {"POLICY", "COC", "PIN CODE", "FIRST NAME", "MIDDLE NAME", "LAST NAME", "OCCUPATION",
+			"RELATIONSHIP", "ADDRESS", "PHONE", "BDATE", "AGE", "ACTIVATION PLAN", "PLAN", "BNFRY NME", "BNFRY REL", "COVER"
+			, "TYPE"};
+	private JButton btnDbRefresh = new JButton("Refresh");
+	private JPanel getDbHeadPane(){
+		dbTableModel = new DefaultTableModel(
+				new Object[][]{},
+				columns
+		){
+			private static final long serialVersionUID = 1L; 
+			public boolean isCellEditable(int row, int col){
+				return false;
+			}
+		};
+		dbTable = new JTable(dbTableModel);
+		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		pane.add(new JLabel("Search:"), "split");
+		pane.add(txtDbSearch, "grow");
+		pane.add(btnDbSearch, "wrap");
+		pane.add(new JScrollPane(dbTable), "wrap, grow, span, w 1280, h 700");
+		pane.add(btnDbRefresh);
+		dbController = new DBController(docBuff, txtBuffer);
+		return pane;
+	}
 }

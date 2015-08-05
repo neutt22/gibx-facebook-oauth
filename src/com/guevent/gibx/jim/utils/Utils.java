@@ -7,15 +7,15 @@ import javax.swing.text.StyledDocument;
 
 import org.ini4j.Wini;
 
-import com.guevent.gibx.jim.FBView;
+import com.guevent.gibx.jim.MainView;
 
 
 public class Utils {
 	
 	public static void updateToken(String token, StyledDocument txtBuffer){
 		try {
-			txtBuffer.insertString(txtBuffer.getLength(), "Wring to: " + FBView.APPDATA + FBView.INI_NAME + "\n", null);
-			Wini ini = new Wini(new File(FBView.APPDATA + FBView.INI_NAME));
+			txtBuffer.insertString(txtBuffer.getLength(), "Wring to: " + MainView.APPDATA + MainView.INI_NAME + "\n", null);
+			Wini ini = new Wini(new File(MainView.APPDATA + MainView.INI_NAME));
 			ini.put("main", "user_token", token);
 			ini.store();
 			txtBuffer.insertString(txtBuffer.getLength(), "Done. User token update to:\n", null);
@@ -27,7 +27,7 @@ public class Utils {
 	
 	public static void showToken(JTextField txtToken){
 		try {
-			Wini ini = new Wini(new File(FBView.APPDATA + FBView.INI_NAME));
+			Wini ini = new Wini(new File(MainView.APPDATA + MainView.INI_NAME));
 			String user_token = ini.get("main", "user_token");
 			txtToken.setText(user_token);
 		} catch (Exception e) {
