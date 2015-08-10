@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -74,6 +75,7 @@ public class MainView extends JFrame{
 		add(setupBuffer());
 		setupListener();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
 		setupSkin();
 		pack();
 		init();
@@ -108,8 +110,21 @@ public class MainView extends JFrame{
 		mnuToolsRecursive.setActionCommand("db_recursive");
 		mnuToolsRecursive.addActionListener(dbController);
 		
+		mnuToolsDelete.setActionCommand("db_delete");
+		mnuToolsDelete.addActionListener(dbController);
+		
+		mnuToolsClose.setActionCommand("db_close");
+		mnuToolsClose.addActionListener(dbController);
+		
+		txtDbSearch.setActionCommand("db_search");
+		txtDbSearch.addActionListener(dbController);
 		btnDbSearch.setActionCommand("db_search");
-		btnDbSearch.addActionListener(dbController);		
+		btnDbSearch.addActionListener(dbController);	
+		
+		txtDbMaxRow.setActionCommand("db_refresh");
+		txtDbMaxRow.addActionListener(dbController);
+		btnDbRefresh.setActionCommand("db_refresh");
+		btnDbRefresh.addActionListener(dbController);
 	}
 	
 	private void init(){
@@ -193,6 +208,8 @@ public class MainView extends JFrame{
 	private JMenu mnuTools = new JMenu("Tools");
 	private JMenuItem mnuToolsDbLoad = new JMenuItem("Load");
 	private JMenuItem mnuToolsRecursive = new JMenuItem("Recursive");
+	private JMenuItem mnuToolsDelete = new JMenuItem("Delete");
+	private JMenuItem mnuToolsClose = new JMenuItem("Close");
 	private void setupMenu(){
 		mnuFile.setMnemonic(KeyEvent.VK_F);
 		mnuPublish.setMnemonic(KeyEvent.VK_P);
@@ -208,6 +225,8 @@ public class MainView extends JFrame{
 		mnuBar.add(mnuRemote);
 		mnuTools.add(mnuToolsDbLoad);
 		mnuTools.add(mnuToolsRecursive);
+		mnuTools.add(mnuToolsDelete);
+		mnuTools.add(mnuToolsClose);
 		mnuBar.add(mnuTools);
 		mnuBar.add(mnuAbout);
 		setJMenuBar(mnuBar);
@@ -233,12 +252,15 @@ public class MainView extends JFrame{
 	
 	private JTextField txtDbSearch = new JTextField();
 	private JButton btnDbSearch = new JButton("Search");
+	private JComboBox<String> cboSeach = new JComboBox<String>(Utils.getSearchCat());
 	private JTable dbTable;
 	private DefaultTableModel dbTableModel;
-	private String[] columns = {"POLICY", "COC", "PIN CODE", "FIRST NAME", "MIDDLE NAME", "LAST NAME", "OCCUPATION",
+	private String[] columns = {"ID", "POLICY", "COC", "PIN CODE", "FIRST NAME", "MIDDLE NAME", "LAST NAME", "OCCUPATION",
 			"RELATIONSHIP", "ADDRESS", "PHONE", "BDATE", "AGE", "ACTIVATION PLAN", "PLAN", "BNFRY NME", "BNFRY REL", "COVER"
 			, "TYPE"};
+	private JTextField txtDbMaxRow = new JTextField("100");
 	private JButton btnDbRefresh = new JButton("Refresh");
+	private JButton btnDbExport = new JButton("Export");
 	private JPanel getDbHeadPane(){
 		dbTableModel = new DefaultTableModel(
 				new Object[][]{},
@@ -250,13 +272,23 @@ public class MainView extends JFrame{
 			}
 		};
 		dbTable = new JTable(dbTableModel);
+		dbTable.setAutoCreateRowSorter(true);
 		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		pane.add(new JLabel("Search:"), "split");
+		pane.add(cboSeach);
 		pane.add(txtDbSearch, "grow");
 		pane.add(btnDbSearch, "wrap");
 		pane.add(new JScrollPane(dbTable), "wrap, grow, span, w 1280, h 700");
+		pane.add(new JLabel("Max Row:"), "split 3");
+		pane.add(txtDbMaxRow, "w 50");
 		pane.add(btnDbRefresh);
-		dbController = new DBController(docBuff, txtBuffer);
+		pane.add(btnDbExport, "align right");
+		dbController = new DBController(dbTableModel, docBuff, txtBuffer);
+		dbController.setTextDbMaxRow(txtDbMaxRow);
+		dbController.setCboDbSearch(cboSeach);
+		dbController.setTextDbSearch(txtDbSearch);
 		return pane;
 	}
+	
+	
 }
