@@ -3,8 +3,10 @@ package com.guevent.gibx.jim.controller;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -12,6 +14,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -55,6 +58,7 @@ public class Controller implements ActionListener{
 		StyleConstants.setForeground(STYLE_ITALIC, Color.decode("#FF6600"));
 		StyleConstants.setItalic(STYLE_ITALIC, true);
 		
+		
 		STYLE_FAILED = txtBuffer.addStyle("STYLE_ITALIC", defaultStyle);
 		StyleConstants.setForeground(STYLE_FAILED, Color.RED);
 		StyleConstants.setBold(STYLE_FAILED, true);
@@ -64,6 +68,16 @@ public class Controller implements ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent ae){
+		if(ae.getActionCommand().equals("check_birthdates")){
+			JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File("J:/"));
+			chooser.setAcceptAllFileFilterUsed(false);
+			chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel Files", "xlsx"));
+			int res = chooser.showOpenDialog(null);
+			if(res == JFileChooser.APPROVE_OPTION){
+				
+			}
+		}
 		if(ae.getActionCommand().equals("get_user_token")){
 			new UIWorker().executeUserTokenWorker();
 		}

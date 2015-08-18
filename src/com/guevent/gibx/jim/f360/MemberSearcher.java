@@ -14,7 +14,7 @@ public class MemberSearcher {
 	private static MemberSearcher memberSeacher;
 	
 	private MemberSearcher(){
-		con = new F360DbConnection().connect("J:\\F360 Daily Reports\\f360.accdb");
+		con = new F360DbConnection().connect(F360DbConnection.DB_URL);
 	}
 	
 	static{

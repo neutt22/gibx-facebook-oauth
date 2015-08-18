@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
@@ -49,13 +50,15 @@ public class DBController implements ActionListener {
 		txtDbMaxRow = textField;
 	}
 	
-	private StyledDocument txtBuffer;
+	private static StyledDocument txtBuffer;
 	private JTextPane bufferPane;
 	private DefaultTableModel tableModel;
+	private JProgressBar bar;
 	
-	public DBController(DefaultTableModel model, StyledDocument txtBuffer, JTextPane bufferPane){
+	public DBController(DefaultTableModel model, StyledDocument txtBuffer, JTextPane bufferPane, JProgressBar prg){
 		this.txtBuffer = txtBuffer;
 		this.bufferPane = bufferPane;
+		bar = prg;
 		tableModel = model;
 	}
 	
@@ -77,6 +80,12 @@ public class DBController implements ActionListener {
 			if(ae.getSource() instanceof JTextField){
 				((JTextField)ae.getSource()).selectAll();
 			}
+		}
+		if(ae.getActionCommand().equals("db_export")){
+			String path = Utils.getTableData(tableModel, bar);
+			write("Current list exported @" + path + "\n", Controller.STYLE_SUCCESS);
+			write(Controller.DASH, null);
+			
 		}
 		if(ae.getActionCommand().equals("db_load")){
 			new UIWorker().executeDbMemberAdder();
@@ -145,6 +154,7 @@ public class DBController implements ActionListener {
 			
 			protected Boolean doInBackground() throws Exception{
 				JFileChooser chooser = new JFileChooser();
+				chooser.setCurrentDirectory(new File("J:/F360 Daily Reports"));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel Files", "xlsx"));
 				int res = chooser.showOpenDialog(null);
@@ -393,7 +403,7 @@ public class DBController implements ActionListener {
 	
 	}
 
-	private void write(String msg, Style style){
+	public static void write(String msg, Style style){
 		try{
 			txtBuffer.insertString(txtBuffer.getLength(), msg, style);
 		}catch(Exception e){

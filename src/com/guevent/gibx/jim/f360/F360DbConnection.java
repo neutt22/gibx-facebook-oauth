@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public class F360DbConnection {
 	
-	public static String DB_URL = "J:\\F360 Daily Reports\\f360.accdb";
+	public static String DB_URL = "C:/GED/f360.accdb";
 	
 	static{
 		try {

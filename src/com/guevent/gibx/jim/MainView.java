@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -37,7 +36,7 @@ import org.ini4j.Wini;
 import com.guevent.gibx.jim.controller.Controller;
 import com.guevent.gibx.jim.controller.DBController;
 import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
-import com.guevent.gibx.jim.f360.F360Member;
+import com.guevent.gibx.jim.publisher.facebook.BirthdayPane;
 import com.guevent.gibx.jim.utils.Utils;
 
 public class MainView extends JFrame{
@@ -49,30 +48,33 @@ public class MainView extends JFrame{
 	public static String INI_NAME = "gibx_conf.ini";
 
 	public static void main(String args[]){
-		USERNAME = args[0];
-		PASSWORD = args[1];
-		//new MainView(new BirthdayChecker().readExcel());
-		new MainView(null);
+		new MainView();
 	}
 	
-	private List<F360Member> members;
-	public MainView(List<F360Member> m){
+	public MainView(){
 		super("GIBX Facebook Group Updater v." + Main.VERSION);
-		setLayout(new MigLayout("fill"));
+		setLayout(new MigLayout("insets 0 0 0 0"));
 		setupMenu();
 		
 		JTabbedPane tabPane = new JTabbedPane();
-		JPanel fbPane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		JPanel fbPane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 		fbPane.add(setupHead(), "wrap, top");
-		//fbPane.add(setupBuffer(), "wrap");
 		tabPane.add("Publish", fbPane);
 		
-		JPanel dbPane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		JPanel dbPane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 		dbPane.add(getDbHeadPane(), "wrap, top");
 		tabPane.add("F360", dbPane);
 		
+		JPanel remotePane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
+		remotePane.add(new JLabel("UNDER CONSTRUCTION..."));
+		tabPane.add("Remote", remotePane);
+		
+		JPanel reportPane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
+		reportPane.add(new JLabel("UNDER CONSTRUCTION..."));
+		tabPane.add("Report", reportPane);
+		
 		add(tabPane, "top, wrap");
-		add(setupBuffer());
+		add(setupBuffer(), "grow, span");
 		setupListener();
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
@@ -82,7 +84,6 @@ public class MainView extends JFrame{
 		setLocationRelativeTo(null);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setVisible(true);
-		members = m;
 	}
 	
 	private Controller controller;
@@ -90,6 +91,9 @@ public class MainView extends JFrame{
 	private void setupListener(){
 		btnCheckToken.setActionCommand("get_user_token");
 		btnCheckToken.addActionListener(controller);
+		
+		btnChkBirthday.setActionCommand("check_birthdates");
+		btnChkBirthday.addActionListener(controller);
 		
 		btnClear.setActionCommand("clear_buff");
 		btnClear.addActionListener(controller);
@@ -125,6 +129,9 @@ public class MainView extends JFrame{
 		txtDbMaxRow.addActionListener(dbController);
 		btnDbRefresh.setActionCommand("db_refresh");
 		btnDbRefresh.addActionListener(dbController);
+		
+		btnDbExport.setActionCommand("db_export");
+		btnDbExport.addActionListener(dbController);
 	}
 	
 	private void init(){
@@ -149,16 +156,19 @@ public class MainView extends JFrame{
 	private JButton btnApply = new JButton("Apply");
 	private JButton btnClear = new JButton("Clear");
 	private Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);
+	
 	private JPanel setupBuffer(){
-		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		JPanel pane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 		txtBuffer.setCursor(textCursor);
 		txtBuffer.setEditable(false);
+		
 		pane.add(new JLabel("Buffer:"), "span, split");
-		pane.add(new JSeparator(JSeparator.HORIZONTAL), "w 1280, wrap");
-		pane.add(new JScrollPane(txtBuffer), "grow, h 800, wrap");
+		pane.add(new JSeparator(JSeparator.HORIZONTAL), "grow, wrap");
+		pane.add(new JScrollPane(txtBuffer), "grow, h 800, wrap, span");
 		pane.add(prgBuffer, "grow, split");
 		pane.add(btnApply);
-		pane.add(btnClear);
+		pane.add(btnClear, "wrap");
+		
 		gibxAccount = new GIBXAccount(txtUsername, txtPassword);
 		controller = new Controller(docBuff, txtUserToken, gibxAccount, prgBuffer);
 		txtBuffer.setForeground(Color.WHITE);
@@ -171,7 +181,7 @@ public class MainView extends JFrame{
 	//ToDo: Timer when is the next update
 	private JTextField txtUsername = new JTextField(20);
 	private JPasswordField txtPassword = new JPasswordField(20);
-	private JCheckBox chkBirthday = new JCheckBox("Post Birthday Card", true);
+	private JButton btnChkBirthday = new JButton("Check Birthdates");
 	private JCheckBox chkRenewal = new JCheckBox("Post Renewal Card", true);
 	private JCheckBox chkCongrats = new JCheckBox("Post Congratulations Card", true);
 	private JButton btnPublishText = new JButton("Publish Text");
@@ -179,21 +189,27 @@ public class MainView extends JFrame{
 	private JTextField txtUserToken = new JTextField("Please specify your API token");
 	private JButton btnCheckToken = new JButton("Get Token");
 	private JButton btnUpdateToken = new JButton("Update");
+	private BirthdayPane paneBirthday = new BirthdayPane();
 	private JPanel setupHead(){
-		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
+		JPanel pane = new JPanel(new MigLayout("insets 0 0 0 0"));
+//		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
 		pane.add(new JLabel("Username:"), "split 2");
-		pane.add(txtUsername, "grow");
+		pane.add(txtUsername, "w 200, grow");
 		pane.add(new JLabel("Password:"), "gapleft 40, split 2");
-		pane.add(txtPassword, "grow");
+		pane.add(txtPassword, "w 200, grow");
 		pane.add(btnCheckToken, "wrap");
-		pane.add(chkBirthday);
+		pane.add(btnChkBirthday);
 		pane.add(btnPublishText, "w 120, split 2, center");
 		pane.add(btnPublishPhoto, "w 120, wrap");
-		pane.add(chkRenewal, "wrap");
+		pane.add(chkRenewal, "wrap, align left");
 		pane.add(chkCongrats, "wrap");
 		pane.add(new JLabel("User Token:"), "split 3, span");
 		pane.add(txtUserToken, "growx");
 		pane.add(btnUpdateToken, "wrap");
+		
+		paneBirthday.add(new JButton("XXXX"));
+		pane.add(paneBirthday, "wrap, span, grow, h 200!");
+		
 		pane.add(new JSeparator(), "growx, span");
 		return pane;
 	}
@@ -273,17 +289,17 @@ public class MainView extends JFrame{
 		};
 		dbTable = new JTable(dbTableModel);
 		dbTable.setAutoCreateRowSorter(true);
-		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
-		pane.add(new JLabel("Search:"), "split");
+		JPanel pane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
+		pane.add(new JLabel("Search:"), "split 4");
 		pane.add(cboSeach);
 		pane.add(txtDbSearch, "grow");
 		pane.add(btnDbSearch, "wrap");
-		pane.add(new JScrollPane(dbTable), "wrap, grow, span, w 1280, h 700");
+		pane.add(new JScrollPane(dbTable), "w 1500, wrap, span");
 		pane.add(new JLabel("Max Row:"), "split 3");
 		pane.add(txtDbMaxRow, "w 50");
 		pane.add(btnDbRefresh);
 		pane.add(btnDbExport, "align right");
-		dbController = new DBController(dbTableModel, docBuff, txtBuffer);
+		dbController = new DBController(dbTableModel, docBuff, txtBuffer, prgBuffer);
 		dbController.setTextDbMaxRow(txtDbMaxRow);
 		dbController.setCboDbSearch(cboSeach);
 		dbController.setTextDbSearch(txtDbSearch);

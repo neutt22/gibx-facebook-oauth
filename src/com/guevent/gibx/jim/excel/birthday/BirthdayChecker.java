@@ -25,11 +25,20 @@ public class BirthdayChecker {
 		return today.equals(birthdate);
 	}
 	
+	private String excelFile;
+	public BirthdayChecker(String excelFile){
+		this.excelFile = excelFile;
+	}
 	
-	
+	/**
+	 * Check the specified Excel file on the object
+	 * to match any member with same day as today.
+	 * Populates into a List and return.
+	 * {@link #isDateMatched(String, String)}
+	 * @return A List of members with member today
+	 */
 	public List<F360Member> readExcel(){
 		try{
-			String excelFile = "C:/Insurance Report for 2015-06-05.xlsx";
 			FileInputStream fis = new FileInputStream(new File(excelFile));
 			XSSFWorkbook workBook = new XSSFWorkbook(fis);
 			XSSFSheet sheet = workBook.getSheetAt(0);
