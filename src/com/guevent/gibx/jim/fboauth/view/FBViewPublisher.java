@@ -35,7 +35,7 @@ public class FBViewPublisher extends JDialog implements ActionListener, MouseLis
 		btnCancel = new JButton("Cancel");
 		setTitle("GIBX Publisher");
 		JPanel pane = new JPanel();
-		pane.setLayout(new MigLayout("", "[grow]", "[grow]"));
+		pane.setLayout(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 		pane.add(new JLabel("Publish a post:"), "wrap");
 		pane.add(new JScrollPane(txtFeed), "w 400, h 300, grow, wrap");
 		pane.add(new JLabel("Image:"), "split");

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -45,23 +46,38 @@ public class BirthdayChecker {
 			
 			String fullDate = dateFormat.format(new Date());
 			String date = fullDate.substring(0, fullDate.length() - 5);
-			//date = "08/03";
+//			date = "12/10";
 			
 			Iterator<Row> rowIterator = sheet.iterator();
 			while(rowIterator.hasNext()){
 				Row row = rowIterator.next();
-				String firstName = row.getCell(3).getStringCellValue();
-				String middleName = row.getCell(4).getStringCellValue();
-				String lastName = row.getCell(5).getStringCellValue();
-				String birthday = row.getCell(12).getStringCellValue();
+				Cell cell3 = row.getCell(3);
+				Cell cell4 = row.getCell(4);
+				Cell cell5 = row.getCell(5);
+				Cell cell7 = row.getCell(7);
+				if(cell3 != null) cell3.setCellType(1);
+				if(cell4 != null) cell4.setCellType(1);
+				if(cell5 != null) cell5.setCellType(1);
+				if(cell7 != null) cell7.setCellType(1);
+				
+				String firstName = cell3 == null ? "NO NAME" : cell3.getStringCellValue();
+				String middleName = cell4 == null ? "NO NAME" : cell4.getStringCellValue();
+				String lastName = cell5 == null ? "NO NAME" : cell5.getStringCellValue();
+				String relationship = cell7 == null ? "NO REL" : cell7.getStringCellValue();
+				
+				Cell bdayCell = row.getCell(12);
+				if(bdayCell != null) bdayCell.setCellType(1);
+				String birthday = bdayCell == null ? "BAD_DATE" : bdayCell.getStringCellValue();
+				
 				F360Member member = new F360Member();
 				member.setFirstName(firstName);
 				member.setMiddleName(middleName);
 				member.setLastName(lastName);
 				member.setBirthdate(birthday);
+				member.setRelationship(relationship);
 				
-				//System.out.println("Fullname: " + member.getFullName() + " Birthdate: " + member.getBirthdate());
 				if(isDateMatched(date, member.getBirthdate())){
+//					System.out.println("Matching : " + date + " vs " + member.getBirthdate());
 					members.add(member);
 				}
 			}

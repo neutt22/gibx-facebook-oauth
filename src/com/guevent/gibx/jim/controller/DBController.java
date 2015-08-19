@@ -138,7 +138,7 @@ public class DBController implements ActionListener {
         }
     }
 
-	private class UIWorker{
+	public class UIWorker{
 		
 		public void executeDbMemberAdder(){
 			adderWorker.execute();

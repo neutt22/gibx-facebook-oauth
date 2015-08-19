@@ -38,6 +38,8 @@ public class F360Member {
 	}
 
 	public String getBirthdate() {
+//		System.out.println("bday: " + birthdate.length());
+		if(birthdate.length() <= 0) return "BAD_DATE";
 		return birthdate.substring(0, birthdate.length() - 5);
 	}
 	

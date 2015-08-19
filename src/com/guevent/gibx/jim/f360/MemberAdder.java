@@ -42,7 +42,7 @@ public class MemberAdder {
 			ps.setString(8, member.getRelationship());
 			ps.setString(9, member.getAddress());
 			ps.setString(10, member.getPhone());
-			ps.setString(11, member.getBirthdate());
+			ps.setString(11, member.getBirthdateRaw());
 			ps.setString(12, member.getAge());
 			ps.setString(13, member.getActivationPlan());
 			ps.setString(14, member.getPlan());

@@ -5,12 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
@@ -25,7 +23,11 @@ import org.scribe.model.Verifier;
 
 import com.guevent.gibx.jim.FacebookToken;
 import com.guevent.gibx.jim.GIBXAccount;
+import com.guevent.gibx.jim.MainView;
+import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
+import com.guevent.gibx.jim.f360.F360Member;
 import com.guevent.gibx.jim.fboauth.view.FBViewPublisher;
+import com.guevent.gibx.jim.publisher.facebook.BirthdayPane;
 import com.guevent.gibx.jim.publisher.facebook.FacebookAccountPublisher;
 import com.guevent.gibx.jim.publisher.facebook.FacebookGroupPublisher;
 import com.guevent.gibx.jim.utils.BufferStyle;
@@ -39,6 +41,12 @@ public class Controller implements ActionListener{
 	private GIBXAccount gibxAccount;
 	private JTextPane bufferPane;
 	private JProgressBar barProgress;
+	
+	private BirthdayPane bdayPane;
+	public void setBdayPane(BirthdayPane bPane){
+		bdayPane = bPane;
+	}
+	
 	public void setBufferPane(JTextPane bufferPane) { this.bufferPane = bufferPane; }
 	
 	
@@ -64,7 +72,33 @@ public class Controller implements ActionListener{
 		StyleConstants.setBold(STYLE_FAILED, true);
 	}
 	
-	
+	//recursive method
+	private void getFiles(final File f){
+        File files[];
+        String file_;
+        if(f.isFile()){
+        	file_ = f.getAbsolutePath();
+        	if(file_.contains("Insurance Report for")){
+				List<F360Member> members = new BirthdayChecker(f.getAbsolutePath()).readExcel();
+				for(F360Member member : members){
+//					System.out.println(member.getRelationship());
+					if(member.getRelationship().equalsIgnoreCase("principal")){
+						bdayPane.setCelebrant(member.getFullName(), member.getBirthdateRaw());
+						bdayPane.repaintPane();
+						String fileName = MainView.APPDATA + member.getFullName() + ".png";
+						bdayPane.saveToFile(fileName);
+						System.out.println(fileName);
+						new UIWorker().executePublishPhotoWorker("Happy Birthday! :)", fileName);
+					}
+				}
+        	}
+        }else{
+            files = f.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                getFiles(files[i]);
+            }
+        }
+    }
 	
 	@Override
 	public void actionPerformed(ActionEvent ae){
@@ -72,10 +106,10 @@ public class Controller implements ActionListener{
 			JFileChooser chooser = new JFileChooser();
 			chooser.setCurrentDirectory(new File("J:/"));
 			chooser.setAcceptAllFileFilterUsed(false);
-			chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel Files", "xlsx"));
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int res = chooser.showOpenDialog(null);
 			if(res == JFileChooser.APPROVE_OPTION){
-				
+				getFiles(chooser.getSelectedFile());
 			}
 		}
 		if(ae.getActionCommand().equals("get_user_token")){
