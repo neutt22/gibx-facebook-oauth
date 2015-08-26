@@ -4,32 +4,35 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.swing.JFileChooser;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import org.joda.time.DateTime;
 import org.scribe.model.Verifier;
 
 import com.guevent.gibx.jim.FacebookToken;
 import com.guevent.gibx.jim.GIBXAccount;
 import com.guevent.gibx.jim.MainView;
-import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
+import com.guevent.gibx.jim.excel.BirthdayChecker;
+import com.guevent.gibx.jim.excel.RenewalChecker;
 import com.guevent.gibx.jim.f360.F360Member;
 import com.guevent.gibx.jim.fboauth.view.FBViewPublisher;
 import com.guevent.gibx.jim.publisher.facebook.BirthdayPane;
 import com.guevent.gibx.jim.publisher.facebook.FacebookAccountPublisher;
 import com.guevent.gibx.jim.publisher.facebook.FacebookGroupPublisher;
+import com.guevent.gibx.jim.publisher.facebook.RenewalPane;
+import com.guevent.gibx.jim.utils.BirthdayUtils;
 import com.guevent.gibx.jim.utils.BufferStyle;
 import com.guevent.gibx.jim.utils.Utils;
 
@@ -43,8 +46,14 @@ public class Controller implements ActionListener{
 	private JProgressBar barProgress;
 	
 	private BirthdayPane bdayPane;
+	private RenewalPane renewalPane;
+	
 	public void setBdayPane(BirthdayPane bPane){
 		bdayPane = bPane;
+	}
+	
+	public void setRenewalPane(RenewalPane rPane){
+		renewalPane = rPane;
 	}
 	
 	public void setBufferPane(JTextPane bufferPane) { this.bufferPane = bufferPane; }
@@ -81,14 +90,8 @@ public class Controller implements ActionListener{
         	if(file_.contains("Insurance Report for")){
 				List<F360Member> members = new BirthdayChecker(f.getAbsolutePath()).readExcel();
 				for(F360Member member : members){
-//					System.out.println(member.getRelationship());
 					if(member.getRelationship().equalsIgnoreCase("principal")){
-						bdayPane.setCelebrant(member.getFullName(), member.getBirthdateRaw());
-						bdayPane.repaintPane();
-						String fileName = MainView.APPDATA + member.getFullName() + ".png";
-						bdayPane.saveToFile(fileName);
-						System.out.println(fileName);
-						new UIWorker().executePublishPhotoWorker("Happy Birthday! :)", fileName);
+						bdayPane.setCelebrant(member.getFullName());
 					}
 				}
         	}
@@ -96,6 +99,42 @@ public class Controller implements ActionListener{
             files = f.listFiles();
             for (int i = 0; i < files.length; i++) {
                 getFiles(files[i]);
+            }
+        }
+    }
+	
+	//recursive method
+	private void getRenewalFiles(final File f){
+        File files[];
+        String file_;
+        if(f.isFile()){
+        	file_ = f.getAbsolutePath();
+        	if(file_.contains("Insurance Report for")){
+        		int len = file_.split("\\\\").length;
+        		String toCheck = file_.split("\\\\")[len - 1].replace("Insurance Report for ", "").replace(".xlsx", "");
+//        		toCheck = new DateTime(toCheck).plusDays(RenewalChecker.WAITING_PERIOD).toString("yyyy-MM-dd");
+        		
+        		String toCheckYear = toCheck.substring(0, 4); //get the year of the excel
+        		toCheck = toCheck.substring(5);               //get the date of the excel
+        		
+    			int year_today = Integer.parseInt(RenewalChecker.TODAY_YEAR) - 1;
+    			int year_toCheck = Integer.parseInt(toCheckYear);
+    			if(year_today != year_toCheck) return;
+    			
+    			if(toCheck.equalsIgnoreCase(RenewalChecker.TODAY_DATE)){ //the excel file is matched today
+    				System.out.println(file_);
+					List<F360Member> members = new RenewalChecker(f.getAbsolutePath()).readExcel();
+					for(F360Member member : members){
+						if(member.getRelationship().equalsIgnoreCase("principal")){
+							renewalPane.addRenewal(member.getFullName() + " - " + member.getPolicy() + member.getCoc());
+						}
+					}
+    			}
+        	}
+        }else{
+            files = f.listFiles();
+            for (int i = 0; i < files.length; i++) {
+            	getRenewalFiles(files[i]);
             }
         }
     }
@@ -110,6 +149,27 @@ public class Controller implements ActionListener{
 			int res = chooser.showOpenDialog(null);
 			if(res == JFileChooser.APPROVE_OPTION){
 				getFiles(chooser.getSelectedFile());
+				String fileName = MainView.APPDATA + BirthdayPane.getDate() + "_birthdays.png";
+				System.out.println(fileName);
+				bdayPane.repaintPane();
+				bdayPane.saveToFile(fileName);
+				new UIWorker().executePublishPhotoWorker(BirthdayUtils.getBirthdayQuotes(), fileName);
+			}
+		}
+		if(ae.getActionCommand().equals("check_renewal")){
+			JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File("J:/"));
+			chooser.setAcceptAllFileFilterUsed(false);
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int res = chooser.showOpenDialog(null);
+			if(res == JFileChooser.APPROVE_OPTION){
+				getRenewalFiles(chooser.getSelectedFile());
+				String fileName = MainView.APPDATA + RenewalPane.getDate() + "_renewals.png";
+				System.out.println(fileName);
+				renewalPane.repaintPane();
+				renewalPane.saveToFile(fileName);
+				System.out.println("Uploading.. charot");
+				new UIWorker().executePublishPhotoWorker("Should you have any questions or comments, please feel free to contact us at (02) 470 9283.", fileName);
 			}
 		}
 		if(ae.getActionCommand().equals("get_user_token")){

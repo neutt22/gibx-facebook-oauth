@@ -17,20 +17,26 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.joda.time.DateTime;
 
-import com.guevent.gibx.jim.utils.BirthdayUtils;
+import com.guevent.gibx.jim.excel.RenewalChecker;
 
 
-public class BirthdayPane extends JPanel {
+public class RenewalPane extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	public static SimpleDateFormat formatter = new SimpleDateFormat("MMMM dd, Y");
 	
+	public final static String RENEWAL_LINE = "We wish to inform you that your F360 Protect insurance coverage is due " +
+			"to renewal on " + new DateTime(new Date()).plusDays(RenewalChecker.WAITING_PERIOD).toString("MMMM dd, Y") + ".";
+	public final static String RENEWAL_LINE_2 = "As such, kindly give us your renewal instructions before the expiry of your policy. Thank you.";
+	
 	public static String getDate(){ return formatter.format(new Date()); }
 	
-	public BirthdayPane(){
+	public RenewalPane(){
 		bdate = getDate();
 		loadImage(); //paint the image
+		saveToFile("J://lol.png");
 	}
 	
 	public void saveToFile(String fileName){
@@ -45,7 +51,7 @@ public class BirthdayPane extends JPanel {
 		repaint();
 	}
 	
-	public void setCelebrant(String name){
+	public void addRenewal(String name){
 		names.add(WordUtils.capitalize(new String(name).toLowerCase()));
 		loadImage();
 	}
@@ -57,24 +63,28 @@ public class BirthdayPane extends JPanel {
 	
 	public void loadImage(){
 		try {
-			bufferedImage = ImageIO.read(new File(BirthdayUtils.getBirthdayTemplate()));
+			bufferedImage = ImageIO.read(new File("J:/renewal_templates/renewal_template_0.png"));
 			Graphics2D g2 = bufferedImage.createGraphics();
-			Font font = new Font("Serif", Font.PLAIN, 30);
+			Font font = new Font("Times New Roman", Font.PLAIN, 15);
+			g2.setColor(Color.BLACK);
 			
-			int x = 230;
+			int x = 200;
 			int num =0;
 			for(String name : names){
-				if(name.length() >= 15) font = new Font("Serif", Font.PLAIN, 25);
-				g2.setColor(Color.WHITE);
+				g2.setColor(Color.BLACK);
 				g2.setFont(font);
-				x += 30;
-				g2.drawString(++num + ". " + name, 20, x);
+				x += 20;
+				g2.drawString(++num + ". " + name, 15, x);
 			}
 			
-			g2.setColor(Color.WHITE);
-			font = new Font("Century Gothic", Font.PLAIN, 30);
+			font = new Font("Arial", Font.PLAIN, 15);
 			g2.setFont(font);
-			g2.drawString(bdate, 30, 50);
+			g2.drawString(bdate, 25, 25);
+			
+			font = new Font("Arial", Font.PLAIN, 10);
+			g2.setFont(font);
+			g2.drawString(RENEWAL_LINE, 50, 180);
+			g2.drawString(RENEWAL_LINE_2, 50, 190);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

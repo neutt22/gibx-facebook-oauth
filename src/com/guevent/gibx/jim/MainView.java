@@ -35,8 +35,8 @@ import org.ini4j.Wini;
 
 import com.guevent.gibx.jim.controller.Controller;
 import com.guevent.gibx.jim.controller.DBController;
-import com.guevent.gibx.jim.excel.birthday.BirthdayChecker;
 import com.guevent.gibx.jim.publisher.facebook.BirthdayPane;
+import com.guevent.gibx.jim.publisher.facebook.RenewalPane;
 import com.guevent.gibx.jim.utils.Utils;
 
 public class MainView extends JFrame{
@@ -94,6 +94,9 @@ public class MainView extends JFrame{
 		
 		btnChkBirthday.setActionCommand("check_birthdates");
 		btnChkBirthday.addActionListener(controller);
+		
+		btnChkRenewal.setActionCommand("check_renewal");
+		btnChkRenewal.addActionListener(controller);
 		
 		btnClear.setActionCommand("clear_buff");
 		btnClear.addActionListener(controller);
@@ -172,6 +175,7 @@ public class MainView extends JFrame{
 		gibxAccount = new GIBXAccount(txtUsername, txtPassword);
 		controller = new Controller(docBuff, txtUserToken, gibxAccount, prgBuffer);
 		controller.setBdayPane(paneBirthday);
+		controller.setRenewalPane(paneRenewal);
 		txtBuffer.setForeground(Color.WHITE);
 		txtBuffer.setBackground(Color.decode("#383838"));
 		controller.setBufferPane(txtBuffer);
@@ -182,8 +186,8 @@ public class MainView extends JFrame{
 	//ToDo: Timer when is the next update
 	private JTextField txtUsername = new JTextField(20);
 	private JPasswordField txtPassword = new JPasswordField(20);
-	private JButton btnChkBirthday = new JButton("Check Birthdates");
-	private JCheckBox chkRenewal = new JCheckBox("Post Renewal Card", true);
+	private JButton btnChkBirthday = new JButton("Post Birthday Card");
+	private JButton btnChkRenewal = new JButton("Post Renewal Card");
 	private JCheckBox chkCongrats = new JCheckBox("Post Congratulations Card", true);
 	private JButton btnPublishText = new JButton("Publish Text");
 	private JButton btnPublishPhoto = new JButton("Publish Photo");
@@ -191,6 +195,7 @@ public class MainView extends JFrame{
 	private JButton btnCheckToken = new JButton("Get Token");
 	private JButton btnUpdateToken = new JButton("Update");
 	private BirthdayPane paneBirthday = new BirthdayPane();
+	private RenewalPane paneRenewal = new RenewalPane();
 	private JPanel setupHead(){
 		JPanel pane = new JPanel(new MigLayout("insets 0 0 0 0"));
 //		JPanel pane = new JPanel(new MigLayout("", "[grow]", "[grow]"));
@@ -202,14 +207,14 @@ public class MainView extends JFrame{
 		pane.add(btnChkBirthday);
 		pane.add(btnPublishText, "w 120, split 2, center");
 		pane.add(btnPublishPhoto, "w 120, wrap");
-		pane.add(chkRenewal, "wrap, align left");
+		pane.add(btnChkRenewal, "wrap, align left");
 		pane.add(chkCongrats, "wrap");
 		pane.add(new JLabel("User Token:"), "split 3, span");
 		pane.add(txtUserToken, "growx");
 		pane.add(btnUpdateToken, "wrap");
 		
-		paneBirthday.add(new JButton("XXXX"));
-		pane.add(paneBirthday, "wrap, span, grow, h 200!");
+		pane.add(paneBirthday, "grow, h 200!, w 200!");
+		pane.add(paneRenewal, "wrap, span, grow, h 200!, w 200!");
 		
 		pane.add(new JSeparator(), "growx, span");
 		return pane;
