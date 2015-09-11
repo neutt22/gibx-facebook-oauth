@@ -76,7 +76,7 @@ public class BirthdayPane extends JPanel {
 			g2.setFont(font);
 			g2.drawString(bdate, 30, 50);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

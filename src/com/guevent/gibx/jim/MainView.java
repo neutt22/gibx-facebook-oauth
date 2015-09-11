@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -37,9 +38,13 @@ import com.guevent.gibx.jim.controller.Controller;
 import com.guevent.gibx.jim.controller.DBController;
 import com.guevent.gibx.jim.publisher.facebook.BirthdayPane;
 import com.guevent.gibx.jim.publisher.facebook.RenewalPane;
+import com.guevent.gibx.jim.remote.F360RemoteServer;
+import com.guevent.gibx.jim.remote.JRemoteButton;
+import com.guevent.gibx.jim.remote.OnlineCallBack;
+import com.guevent.gibx.jim.remote.RemotePane;
 import com.guevent.gibx.jim.utils.Utils;
 
-public class MainView extends JFrame{
+public class MainView extends JFrame implements OnlineCallBack{
 	
 	private static final long serialVersionUID = 1L;
 	public static String USERNAME, PASSWORD;
@@ -66,7 +71,7 @@ public class MainView extends JFrame{
 		tabPane.add("F360", dbPane);
 		
 		JPanel remotePane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
-		remotePane.add(new JLabel("UNDER CONSTRUCTION..."));
+		remotePane.add(getRemotePane(), "top");
 		tabPane.add("Remote", remotePane);
 		
 		JPanel reportPane = new JPanel(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
@@ -252,6 +257,36 @@ public class MainView extends JFrame{
 		mnuBar.add(mnuTools);
 		mnuBar.add(mnuAbout);
 		setJMenuBar(mnuBar);
+	}
+	
+	
+	public void connections(int size){
+		remoteConPane.setBorder(BorderFactory.createTitledBorder("Connections [" + size + "/8]"));
+	}
+	
+	private JPanel remoteConPane = new JPanel(new MigLayout("insets 0 0 0 0"));
+	private RemotePane remotePane;
+	private JPanel getRemotePane(){
+		F360RemoteServer server = new F360RemoteServer(this);
+		remotePane = new RemotePane();
+		remotePane.setLayout(new MigLayout("insets 0 0 0 0"));
+		server.setRemotePane(remotePane);
+		JPanel pane = new JPanel(new MigLayout("insets 0 0 0 0"));
+		
+		remoteConPane.setBorder(BorderFactory.createTitledBorder("Connections" + " [0/8]"));
+		JPanel paneNames = new JPanel(new MigLayout("insets 0 0 0 0"));
+		paneNames.add(new JRemoteButton("REG-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("OMAN-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("FRANK-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("MITCH-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("FRITZ-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("LIZ", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("PIOLO-PC", server), "wrap, w 100");
+		paneNames.add(new JRemoteButton("DISCONNECT", server), "wrap, w 100");
+		remoteConPane.add(paneNames);
+		
+		pane.add(remoteConPane);
+		return pane;
 	}
 	
 	private void setupSkin(){

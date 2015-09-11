@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JFileChooser;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -18,7 +18,6 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import org.joda.time.DateTime;
 import org.scribe.model.Verifier;
 
 import com.guevent.gibx.jim.FacebookToken;
@@ -44,6 +43,7 @@ public class Controller implements ActionListener{
 	private GIBXAccount gibxAccount;
 	private JTextPane bufferPane;
 	private JProgressBar barProgress;
+	
 	
 	private BirthdayPane bdayPane;
 	private RenewalPane renewalPane;

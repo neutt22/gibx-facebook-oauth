@@ -40,5 +40,6 @@
 	<classpathentry kind="lib" path="J:/libs/xmlbeans-2.3.0.jar/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="J:/libs/guava-18.0.jar"/>
 	<classpathentry kind="lib" path="J:/libs/joda-time-2.8.2.jar"/>
+	<classpathentry kind="lib" path="J:/libs/kryonet-2.21/kryonet-2.21/jars/production/onejar/kryonet-2.21-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

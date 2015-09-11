@@ -38,7 +38,12 @@ public class BirthdayUtils {
 	}
 	
 	public static String getBirthdayTemplate(){
-		File files[] = new File("J:/birthday templates").listFiles();
+		File files[] = null;
+		try{
+			files = new File("J:/birthday templates").listFiles();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return "J:/birthday templates/bday_template_" + random.nextInt(files.length) + ".png";
 	}
 
